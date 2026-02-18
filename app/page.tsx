@@ -12,11 +12,13 @@ export default function Page() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const savedRole = typeof window !== 'undefined' ? localStorage.getItem('aurum_role') : null;
-    if (savedRole === 'admin' || savedRole === 'client') {
-      setUserRole(savedRole as 'admin' | 'client');
+    if (typeof window !== 'undefined') {
+      const savedRole = localStorage.getItem('aurum_role');
+      if (savedRole === 'admin' || savedRole === 'client') {
+        setUserRole(savedRole as 'admin' | 'client');
+      }
+      setIsLoading(false);
     }
-    setIsLoading(false);
   }, []);
 
   const handleLogin = (role: 'admin' | 'client') => {
@@ -32,19 +34,19 @@ export default function Page() {
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white">
-        <div className="w-8 h-8 border-4 border-steelblue border-t-transparent rounded-full animate-spin"></div>
+        <div className="w-8 h-8 border-4 border-[#4682B4] border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#FFFFFF]">
+    <div className="min-h-screen flex flex-col bg-white">
       <header className="bg-white border-b border-gray-100 sticky top-0 z-50 px-8 py-6">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <div className="flex items-center gap-8">
-            <h1 className="text-2xl font-black text-steelblue tracking-tighter uppercase">Aurum Studio.</h1>
+            <h1 className="text-2xl font-black text-[#4682B4] tracking-tighter uppercase">Aurum Studio.</h1>
             {userRole && (
-              <span className="bg-steelblue/10 text-steelblue text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full border border-steelblue/20">
+              <span className="bg-[#4682B4]/10 text-[#4682B4] text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full border border-[#4682B4]/20">
                 {userRole === 'admin' ? 'Internal Dashboard' : 'Client Portal'}
               </span>
             )}
@@ -52,7 +54,7 @@ export default function Page() {
           {userRole && (
             <button 
               onClick={handleLogout}
-              className="text-gray-400 text-xs font-black uppercase tracking-widest hover:text-steelblue transition-colors flex items-center gap-2"
+              className="text-gray-400 text-xs font-black uppercase tracking-widest hover:text-[#4682B4] transition-colors flex items-center gap-2"
             >
               Sign Out
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
@@ -89,12 +91,12 @@ export default function Page() {
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="flex flex-col gap-1">
              <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">© 2024 Aurum Studio - Internal Use Only</p>
-             <p className="text-[9px] text-gray-300 font-medium uppercase tracking-widest opacity-60">Optimized for Vercel Deployment</p>
+             <p className="text-[9px] text-gray-300 font-medium uppercase tracking-widest opacity-60">Production Ready Build</p>
           </div>
           <div className="flex gap-8 text-[10px] font-black uppercase tracking-widest text-gray-400">
-            <span className="hover:text-steelblue cursor-pointer transition-colors">Support</span>
-            <span className="hover:text-steelblue cursor-pointer transition-colors">Security</span>
-            <span className="hover:text-steelblue cursor-pointer transition-colors">PayHere SL</span>
+            <span className="hover:text-[#4682B4] cursor-pointer transition-colors">Support</span>
+            <span className="hover:text-[#4682B4] cursor-pointer transition-colors">Security</span>
+            <span className="hover:text-[#4682B4] cursor-pointer transition-colors">PayHere SL</span>
           </div>
         </div>
       </footer>
