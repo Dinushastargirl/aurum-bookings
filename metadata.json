@@ -1,0 +1,7 @@
+{
+  "name": "Aurum Bookings - Internal Management",
+  "description": "Minimalist internal booking system for Aurum Studio, featuring role-based access and custom SL scheduling rules.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}
