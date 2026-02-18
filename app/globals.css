@@ -1,0 +1,23 @@
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --steelblue: #4682B4;
+  --aurum-grey: #808080;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: #ffffff;
+  color: #333333;
+}
+
+.bg-steelblue { background-color: var(--steelblue); }
+.text-steelblue { color: var(--steelblue); }
+.border-steelblue { border-color: var(--steelblue); }
+
+.bg-aurum-grey { background-color: var(--aurum-grey); }
+.text-aurum-grey { color: var(--aurum-grey); }
+.border-aurum-grey { border-color: var(--aurum-grey); }
