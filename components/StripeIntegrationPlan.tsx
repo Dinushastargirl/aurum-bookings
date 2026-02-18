@@ -11,24 +11,28 @@ const StripeIntegrationPlan: React.FC = () => {
         </h2>
         <div className="bg-slate-50 p-6 rounded-xl border border-slate-200 font-mono text-sm">
           <p className="text-indigo-600 font-bold mb-2">// POST /api/bookings</p>
-          <p className="text-slate-600 mb-4">Implementation Strategy to prevent double-booking:</p>
+          <p className="text-slate-600 mb-4">Atomic locking strategy using Database Transactions:</p>
           <pre className="whitespace-pre-wrap text-slate-800">
-{`async function createBooking(data) {
-  return await prisma.$transaction(async (tx) => {
-    // 1. SELECT FOR UPDATE (Atomic check)
-    const existing = await tx.appointment.findFirst({
-      where: {
-        staffId: data.staffId,
-        startTime: { lt: data.endTime },
-        endTime: { gt: data.startTime },
-        status: { not: 'CANCELLED' }
-      }
-    });
+{`async function createBooking(req, res) {
+  const { staffId, startTime, endTime } = req.body;
 
-    if (existing) throw new Error("Slot already taken");
+  // Use a database transaction to ensure atomicity
+  const result = await db.transaction(async (tx) => {
+    // 1. Check for overlapping appointments (Pessimistic Locking)
+    const conflict = await tx.query(\`
+      SELECT id FROM appointments 
+      WHERE staff_id = $1 
+      AND status != 'CANCELLED'
+      AND (start_time, end_time) OVERLAPS ($2, $3)
+      LIMIT 1
+    \`, [staffId, startTime, endTime]);
 
-    // 2. Create booking
-    return await tx.appointment.create({ data });
+    if (conflict.length > 0) {
+      throw new Error("Slot already booked");
+    }
+
+    // 2. Insert new record
+    return await tx.insert('appointments', req.body);
   });
 }`}
           </pre>
@@ -43,19 +47,19 @@ const StripeIntegrationPlan: React.FC = () => {
         <div className="grid md:grid-cols-2 gap-6">
           <div className="p-4 border rounded-xl hover:bg-indigo-50 transition-colors">
             <h4 className="font-bold text-indigo-700 mb-2">1. Onboarding</h4>
-            <p className="text-sm text-gray-600 leading-relaxed">Salon owners connect their bank accounts via Stripe Standard/Express accounts. We store the <code>stripe_account_id</code> in the Business model.</p>
+            <p className="text-sm text-gray-600 leading-relaxed">Salon owners connect their bank accounts via Stripe Standard/Express accounts. We store the <code>stripe_account_id</code> in the Business profile.</p>
           </div>
           <div className="p-4 border rounded-xl hover:bg-indigo-50 transition-colors">
             <h4 className="font-bold text-indigo-700 mb-2">2. Destination Charges</h4>
-            <p className="text-sm text-gray-600 leading-relaxed">Consumer pays $100. Fresha takes a 20% fee ($20). $80 is automatically routed to the Salon's Stripe account using <code>transfer_data[destination]</code>.</p>
+            <p className="text-sm text-gray-600 leading-relaxed">Consumer pays LKR 4000. Fresha takes a 20% fee. Remainder is automatically routed to the Salon's account.</p>
           </div>
           <div className="p-4 border rounded-xl hover:bg-indigo-50 transition-colors">
-            <h4 className="font-bold text-indigo-700 mb-2">3. Locking & Payouts</h4>
-            <p className="text-sm text-gray-600 leading-relaxed">Funds are held until the Appointment Status is updated to 'COMPLETED' or after 24 hours of service time via a Webhook trigger.</p>
+            <h4 className="font-bold text-indigo-700 mb-2">3. Webhook Handling</h4>
+            <p className="text-sm text-gray-600 leading-relaxed">Update appointment status in real-time when <code>checkout.session.completed</code> is received.</p>
           </div>
           <div className="p-4 border rounded-xl hover:bg-indigo-50 transition-colors">
-            <h4 className="font-bold text-indigo-700 mb-2">4. Refunds</h4>
-            <p className="text-sm text-gray-600 leading-relaxed">Automated refund logic based on the salon's cancellation policy (e.g. 100% back if {'>'} 24h before).</p>
+            <h4 className="font-bold text-indigo-700 mb-2">4. Payout Rules</h4>
+            <p className="text-sm text-gray-600 leading-relaxed">Funds are settled to the merchant based on the studio's verification status (usually T+2 days).</p>
           </div>
         </div>
       </section>
